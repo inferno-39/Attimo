@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-canvas text-graphite font-sans antialiased;
+}
+
+::selection {
+  background: rgb(212 190 148 / 0.38);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
