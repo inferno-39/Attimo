@@ -20,16 +20,15 @@ export function RegisterForm() {
 
   return (
     <FadeIn className="space-y-10 border border-line/70 bg-canvas px-10 py-12 shadow-[0_26px_80px_rgba(28,28,28,0.08)]">
-      <div className="space-y-4 text-center">
-        <p className="font-sans text-caption-wide uppercase tracking-[0.26em] text-ash">Новый клиент</p>
+      <div className="space-y-3 text-center">
         <h1 className="font-serif text-display-lg text-graphite">Регистрация</h1>
         <p className="font-sans text-[14px] text-stone leading-relaxed">
-          Один спокойный шаг — имя, почта и пароль. Дальше избранное и заказы останутся с вами.
+          Создайте аккаунт: укажите имя, email и пароль. После регистрации вы сможете сохранять избранное и оформлять заказы.
         </p>
       </div>
 
       <motion.form
-        className="space-y-7"
+        className="space-y-6"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: MOTION_DURATION.md, ease: EASE_LUXURY }}
@@ -65,45 +64,88 @@ export function RegisterForm() {
           });
         }}
       >
-        <AuthField
-          htmlFor="reg-name"
-          label="Имя"
-          error={fieldErrors?.name?.[0]}
-        >
-          <Input id="reg-name" name="name" autoComplete="name" required disabled={pending} />
+        <AuthField htmlFor="reg-name" label="Имя" error={fieldErrors?.name?.[0]}>
+          <Input
+            id="reg-name"
+            name="name"
+            type="text"
+            autoComplete="name"
+            placeholder="Как к вам обращаться"
+            required
+            disabled={pending}
+          />
         </AuthField>
-        <AuthField htmlFor="reg-email" label="Эл. почта" error={fieldErrors?.email?.[0]}>
-          <Input id="reg-email" name="email" type="email" autoComplete="email" required disabled={pending} />
+        <AuthField htmlFor="reg-email" label="Email" error={fieldErrors?.email?.[0]}>
+          <Input
+            id="reg-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            required
+            disabled={pending}
+          />
         </AuthField>
-        <AuthField
-          htmlFor="reg-password"
-          label="Пароль"
-          hint="Не короче 8 символов."
-          error={fieldErrors?.password?.[0]}
-        >
+        <AuthField htmlFor="reg-password" label="Пароль" error={fieldErrors?.password?.[0]}>
           <Input
             id="reg-password"
             name="password"
             type="password"
             autoComplete="new-password"
+            placeholder="Не менее 8 символов"
             required
             disabled={pending}
           />
         </AuthField>
+        <AuthField htmlFor="reg-password-confirm" label="Повторите пароль" error={fieldErrors?.passwordConfirm?.[0]}>
+          <Input
+            id="reg-password-confirm"
+            name="passwordConfirm"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Тот же пароль ещё раз"
+            required
+            disabled={pending}
+          />
+        </AuthField>
+
+        <div className="space-y-2">
+          <label className="flex cursor-pointer items-start gap-3 font-sans text-[13px] leading-snug text-stone">
+            <input
+              type="checkbox"
+              name="acceptTerms"
+              className="mt-1 h-4 w-4 shrink-0 rounded-none border border-line text-graphite accent-graphite"
+              disabled={pending}
+            />
+            <span>
+              Я согласен с{" "}
+              <Link href="/about" className="border-b border-graphite/35 pb-px text-graphite hover:border-graphite">
+                условиями использования
+              </Link>{" "}
+              и обработкой персональных данных.
+            </span>
+          </label>
+          {fieldErrors?.acceptTerms?.[0] ? (
+            <p className="font-sans text-[12px] text-graphite/90" role="alert">
+              {fieldErrors.acceptTerms[0]}
+            </p>
+          ) : null}
+        </div>
+
         {formError ? (
           <p className="text-center font-sans text-[13px] text-graphite/90" role="alert">
             {formError}
           </p>
         ) : null}
         <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Создание…" : "Создать аккаунт"}
+          {pending ? "Регистрация…" : "Зарегистрироваться"}
         </Button>
       </motion.form>
 
       <p className="text-center font-sans text-[13px] text-stone">
-        Уже есть доступ?{" "}
+        Уже есть аккаунт?{" "}
         <Link href="/auth/login" className="border-b border-graphite/40 pb-px transition-colors hover:border-graphite">
-          Вход
+          Войти
         </Link>
       </p>
     </FadeIn>

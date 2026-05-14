@@ -6,6 +6,22 @@ export const registerSchema = z.object({
   name: z.string().min(1, "Укажите имя").max(120),
 });
 
+/** Форма регистрации на сайте: подтверждение пароля и согласие. */
+export const registerFormSchema = z
+  .object({
+    name: z.string().min(1, "Укажите имя").max(120),
+    email: z.string().email("Некорректный email"),
+    password: z.string().min(8, "Пароль не короче 8 символов"),
+    passwordConfirm: z.string().min(1, "Подтвердите пароль"),
+    acceptTerms: z
+      .boolean()
+      .refine((v) => v === true, { message: "Подтвердите согласие с условиями использования" }),
+  })
+  .refine((data) => data.password === data.passwordConfirm, {
+    message: "Пароли не совпадают",
+    path: ["passwordConfirm"],
+  });
+
 export const orderItemSchema = z.object({
   productId: z.string().min(1),
   quantity: z.number().int().positive().max(99),

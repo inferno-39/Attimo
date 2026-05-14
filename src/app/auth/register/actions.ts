@@ -1,6 +1,6 @@
 "use server";
 
-import { registerSchema } from "@/server/validation";
+import { registerFormSchema } from "@/server/validation";
 import { AppError } from "@/server/http";
 import { createUser } from "@/services/user-service";
 
@@ -11,10 +11,12 @@ export type RegisterFormState = {
 };
 
 export async function registerUserAction(formData: FormData): Promise<RegisterFormState> {
-  const parsed = registerSchema.safeParse({
+  const parsed = registerFormSchema.safeParse({
     name: String(formData.get("name") ?? "").trim(),
     email: String(formData.get("email") ?? "").trim(),
     password: String(formData.get("password") ?? ""),
+    passwordConfirm: String(formData.get("passwordConfirm") ?? ""),
+    acceptTerms: formData.get("acceptTerms") === "on",
   });
   if (!parsed.success) {
     return { fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
