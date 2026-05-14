@@ -4,11 +4,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  // Приложение: пул (Supabase :6543) или прямой URL
-  url       = env("DATABASE_URL")
-  // Миграции / db push: прямой доступ к Postgres (Supabase «Direct connection» :5432). Локально = тот же URL, что DATABASE_URL.
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
