@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
-import { listProducts } from "@/services/product-service";
+import { handleApiError, jsonOk } from "@/server/http";
+import { productsQuerySchema } from "@/server/validation";
+import { queryProductsApi } from "@/services/product-service";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const products = await listProducts(false);
-    return NextResponse.json({ data: products });
+    const { searchParams } = new URL(request.url);
+    const raw = Object.fromEntries(searchParams.entries());
+    const parsed = productsQuerySchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Некорректные параметры", details: parsed.error.flatten() }, { status: 400 });
+    }
+    const products = await queryProductsApi(parsed.data);
+    return jsonOk(products);
   } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
+    return handleApiError(e);
   }
 }

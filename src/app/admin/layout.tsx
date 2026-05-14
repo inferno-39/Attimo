@@ -3,6 +3,8 @@ import { SITE_NAME } from "@/constants/site";
 
 const nav = [
   { href: "/admin", label: "Обзор" },
+  { href: "/admin/products", label: "Изделия" },
+  { href: "/admin/orders", label: "Заказы" },
   { href: "/api/products", label: "API · JSON" },
   { href: "/", label: "На сайт" },
 ];

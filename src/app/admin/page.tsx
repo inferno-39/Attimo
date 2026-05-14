@@ -45,14 +45,14 @@ export default function AdminDashboardPage() {
       <div className="border border-line/70 bg-ivory/20 px-8 py-9 space-y-4 max-w-3xl">
         <p className="font-serif text-xl text-graphite">База данных (Prisma)</p>
         <p className="font-sans text-[14px] text-stone leading-relaxed">
-          Схема лежит в <code className="font-mono text-[13px] text-graphite">src/prisma/schema.prisma</code>. После
-          настройки <code className="font-mono text-[13px]">DATABASE_URL</code> выполните{" "}
-          <code className="font-mono text-[13px]">npx prisma migrate dev</code> (или{" "}
-          <code className="font-mono text-[13px]">db push</code>). Пока таблицы пусты, каталог на сайте использует mock-данные
-          из <code className="font-mono text-[13px]">src/constants/mock-products.ts</code>.
+          Схема: <code className="font-mono text-[13px] text-graphite">src/prisma/schema.prisma</code>. После{" "}
+          <code className="font-mono text-[13px]">DATABASE_URL</code> выполните{" "}
+          <code className="font-mono text-[13px]">npm run db:migrate</code>, затем{" "}
+          <code className="font-mono text-[13px]">npm run db:seed</code>. Без БД каталог и PDP используют mock из{" "}
+          <code className="font-mono text-[13px]">src/constants/mock-products.ts</code>.
         </p>
         <p className="font-sans text-caption-wide uppercase tracking-[0.2em] text-ash">
-          API: /api/products · /api/products/[id]
+          API: /api/products · /api/categories · /api/collections · /api/wishlist · /api/orders · /api/users/register
         </p>
         <Link
           href="/api/products"

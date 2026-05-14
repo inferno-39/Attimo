@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Container } from "@/components/layout/container";
@@ -14,9 +15,12 @@ const NAV_H = 72;
 
 export function Navbar() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
   const [menu, setMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const isHome = pathname === "/";
+  const authed = status === "authenticated" && Boolean(session?.user);
+  const authLoading = status === "loading";
 
   useEffect(() => {
     document.documentElement.style.setProperty("--nav-h", `${NAV_H}px`);
@@ -94,42 +98,88 @@ export function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-6 lg:gap-9">
-          {(["/wishlist", "/cart", "/profile"] as const).map((href) => {
-            const labels: Record<string, string> = {
-              "/wishlist": "Избранное",
-              "/cart": "Корзина",
-              "/profile": "Профиль",
-            };
-            return (
+          {authLoading ? (
+            <span
+              className={cn("h-2.5 w-24 rounded-none", overlayNav ? "bg-canvas/25" : "bg-line/40")}
+              aria-hidden
+            />
+          ) : authed ? (
+            <>
+              {(["/wishlist", "/cart", "/profile"] as const).map((href) => {
+                const labels: Record<string, string> = {
+                  "/wishlist": "Избранное",
+                  "/cart": "Корзина",
+                  "/profile": "Профиль",
+                };
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      "font-sans text-caption-wide uppercase text-[10px] tracking-[0.26em] transition-colors duration-480",
+                      overlayNav
+                        ? pathname.startsWith(href)
+                          ? "text-canvas"
+                          : "text-canvas/65 hover:text-canvas"
+                        : pathname.startsWith(href)
+                          ? "text-graphite"
+                          : "text-stone hover:text-graphite",
+                    )}
+                  >
+                    {labels[href]}
+                  </Link>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className={cn(
+                  "font-sans text-caption-wide uppercase text-[10px] tracking-[0.26em] transition-colors duration-480",
+                  overlayNav ? "text-canvas/65 hover:text-canvas" : "text-stone hover:text-graphite",
+                )}
+              >
+                Выйти
+              </button>
+            </>
+          ) : (
+            <>
               <Link
-                key={href}
-                href={href}
+                href="/cart"
                 className={cn(
                   "font-sans text-caption-wide uppercase text-[10px] tracking-[0.26em] transition-colors duration-480",
                   overlayNav
-                    ? pathname.startsWith(href)
+                    ? pathname.startsWith("/cart")
                       ? "text-canvas"
                       : "text-canvas/65 hover:text-canvas"
-                    : pathname.startsWith(href)
+                    : pathname.startsWith("/cart")
                       ? "text-graphite"
                       : "text-stone hover:text-graphite",
                 )}
               >
-                {labels[href]}
+                Корзина
               </Link>
-            );
-          })}
-          <Link
-            href="/auth/login"
-            className={cn(
-              "font-sans text-caption-wide uppercase text-[10px] tracking-[0.26em] border-b pb-0.5 transition-colors duration-480",
-              overlayNav
-                ? "border-canvas/40 text-canvas hover:border-canvas"
-                : "border-transparent text-graphite hover:border-graphite",
-            )}
-          >
-            Вход
-          </Link>
+              <Link
+                href="/auth/login"
+                className={cn(
+                  "font-sans text-caption-wide uppercase text-[10px] tracking-[0.26em] border-b pb-0.5 transition-colors duration-480",
+                  overlayNav
+                    ? "border-canvas/40 text-canvas hover:border-canvas"
+                    : "border-transparent text-graphite hover:border-graphite",
+                )}
+              >
+                Вход
+              </Link>
+              <Link
+                href="/auth/register"
+                className={cn(
+                  "font-sans text-caption-wide uppercase text-[10px] tracking-[0.26em] transition-colors duration-480",
+                  overlayNav ? "text-canvas/80 hover:text-canvas" : "text-stone hover:text-graphite",
+                )}
+              >
+                Регистрация
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -213,18 +263,59 @@ export function Navbar() {
                 >
                   <p className="font-sans text-caption-wide uppercase tracking-[0.24em] text-ash">Аккаунт</p>
                   <div className="flex flex-col gap-3 font-sans text-caption-wide uppercase tracking-[0.22em] text-stone">
-                    <Link href="/wishlist" className="py-2 transition-colors duration-480 hover:text-graphite" onClick={() => setMenu(false)}>
-                      Избранное
-                    </Link>
-                    <Link href="/cart" className="py-2 transition-colors duration-480 hover:text-graphite" onClick={() => setMenu(false)}>
-                      Корзина
-                    </Link>
-                    <Link href="/profile" className="py-2 transition-colors duration-480 hover:text-graphite" onClick={() => setMenu(false)}>
-                      Профиль
-                    </Link>
-                    <Link href="/auth/login" className="py-2 transition-colors duration-480 hover:text-graphite" onClick={() => setMenu(false)}>
-                      Вход
-                    </Link>
+                    {authLoading ? (
+                      <span className="h-3 w-28 animate-pulse bg-line/40 py-2" aria-hidden />
+                    ) : authed ? (
+                      <>
+                        <Link
+                          href="/wishlist"
+                          className="py-2 transition-colors duration-480 hover:text-graphite"
+                          onClick={() => setMenu(false)}
+                        >
+                          Избранное
+                        </Link>
+                        <Link href="/cart" className="py-2 transition-colors duration-480 hover:text-graphite" onClick={() => setMenu(false)}>
+                          Корзина
+                        </Link>
+                        <Link
+                          href="/profile"
+                          className="py-2 transition-colors duration-480 hover:text-graphite"
+                          onClick={() => setMenu(false)}
+                        >
+                          Профиль
+                        </Link>
+                        <button
+                          type="button"
+                          className="py-2 text-left transition-colors duration-480 hover:text-graphite"
+                          onClick={() => {
+                            setMenu(false);
+                            void signOut({ callbackUrl: "/" });
+                          }}
+                        >
+                          Выйти
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/cart" className="py-2 transition-colors duration-480 hover:text-graphite" onClick={() => setMenu(false)}>
+                          Корзина
+                        </Link>
+                        <Link
+                          href="/auth/login"
+                          className="py-2 transition-colors duration-480 hover:text-graphite"
+                          onClick={() => setMenu(false)}
+                        >
+                          Вход
+                        </Link>
+                        <Link
+                          href="/auth/register"
+                          className="py-2 transition-colors duration-480 hover:text-graphite"
+                          onClick={() => setMenu(false)}
+                        >
+                          Регистрация
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </motion.div>
               </div>
