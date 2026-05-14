@@ -4,6 +4,7 @@ import { motion, type HTMLMotionProps } from "framer-motion";
 import type { PropsWithChildren } from "react";
 import { fadeUp } from "@/lib/animations/variants";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
+import { EASE_LUXURY, MOTION_DURATION } from "@/lib/motion";
 import { cn } from "@/utils/cn";
 
 type FadeInProps = PropsWithChildren<{
@@ -20,7 +21,7 @@ export function FadeIn({ children, delay = 0, className, ...rest }: FadeInProps)
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-10% 0px" }}
-      transition={{ duration: reduce ? 0.01 : 0.85, delay: reduce ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: reduce ? 0.01 : MOTION_DURATION.lg, delay: reduce ? 0 : delay, ease: EASE_LUXURY }}
       className={cn(className)}
       {...rest}
     >

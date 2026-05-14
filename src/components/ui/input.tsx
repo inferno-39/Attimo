@@ -9,7 +9,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       ref={ref}
       type={type}
       className={cn(
-        "font-sans w-full rounded-none border border-line bg-transparent px-0 py-3 text-[15px] text-graphite",
+        "font-sans min-h-[48px] w-full rounded-none border border-line bg-transparent px-0 py-3.5 text-body-readable text-graphite",
         "placeholder:text-ash/80 outline-none ring-0",
         "focus:border-graphite transition-colors duration-480",
         className,

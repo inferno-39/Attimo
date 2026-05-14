@@ -4,10 +4,12 @@
 
 :root {
   color-scheme: light;
+  --nav-h: 72px;
 }
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-h);
 }
 
 body {
@@ -21,5 +23,18 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /** Горизонтальный скролл фильтров на мобильных без «тяжёлой» полосы */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
   }
 }

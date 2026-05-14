@@ -1,8 +1,9 @@
 "use client";
 
 import { Container } from "@/components/layout/container";
-import { FadeIn } from "@/components/common/fade-in";
 import { motion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
+import { SectionTitle } from "@/components/ui/section-title";
 
 const quotes = [
   {
@@ -26,28 +27,31 @@ const quotes = [
 ];
 
 export function Testimonials() {
+  const reduce = usePrefersReducedMotion();
+
   return (
-    <section className="border-b border-line/60 bg-canvas">
-      <Container className="py-22">
-        <FadeIn className="max-w-2xl pb-14">
-          <p className="font-sans text-caption-wide uppercase tracking-[0.26em] text-ash">Отношение</p>
-          <h2 className="mt-4 font-serif text-display-lg text-graphite">Слова после примерки</h2>
-        </FadeIn>
-        <div className="grid gap-10 md:grid-cols-3">
+    <section className="border-b border-line/50 bg-ivory/15">
+      <Container size="wide" className="py-section md:py-30">
+        <SectionTitle
+          eyebrow="Отношение"
+          title="Слова после примерки"
+          className="max-w-2xl pb-16 md:pb-20"
+        />
+        <div className="grid gap-12 md:grid-cols-3 md:gap-10 lg:gap-14">
           {quotes.map((q, idx) => (
             <motion.figure
               key={q.author}
-              initial={{ opacity: 0, y: 20 }}
+              initial={reduce ? undefined : { opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-10%" }}
-              transition={{ delay: idx * 0.06, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="border border-line/80 bg-canvas px-8 py-10 shadow-[0_18px_50px_rgba(28,28,28,0.05)] flex flex-col"
+              viewport={{ once: true, margin: "-8%" }}
+              transition={{ delay: idx * 0.08, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="flex flex-col border-t border-graphite/15 pt-10"
             >
-              <blockquote className="font-serif text-[1.125rem] leading-relaxed text-graphite flex-grow">
+              <blockquote className="flex-grow font-serif text-[1.05rem] leading-[1.65] text-graphite md:text-[1.125rem]">
                 «{q.quote}»
               </blockquote>
-              <figcaption className="mt-8 pt-6 border-t border-line/70">
-                <p className="font-sans text-caption-wide uppercase tracking-[0.2em] text-stone">{q.author}</p>
+              <figcaption className="mt-10">
+                <p className="font-sans text-caption-wide uppercase tracking-[0.22em] text-stone">{q.author}</p>
                 <p className="mt-2 font-sans text-[12px] text-ash">{q.place}</p>
               </figcaption>
             </motion.figure>

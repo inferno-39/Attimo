@@ -1,12 +1,13 @@
 import type { Variants } from "framer-motion";
+import { EASE_LUXURY, MOTION_DURATION } from "@/lib/motion";
 
-export const easeOut = [0.22, 1, 0.36, 1] as const;
+export const easeOut = EASE_LUXURY;
 
 export const fadeIn: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { duration: 0.7, ease: easeOut },
+    transition: { duration: MOTION_DURATION.md, ease: easeOut },
   },
 };
 
@@ -15,7 +16,7 @@ export const fadeUp: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.85, ease: easeOut },
+    transition: { duration: MOTION_DURATION.lg, ease: easeOut },
   },
 };
 
@@ -31,11 +32,11 @@ export const pageTransition = {
   animate: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.56, ease: easeOut },
+    transition: { duration: MOTION_DURATION.sm, ease: easeOut },
   },
   exit: {
     opacity: 0,
     y: -10,
-    transition: { duration: 0.35, ease: easeOut },
+    transition: { duration: MOTION_DURATION.xs, ease: easeOut },
   },
 };

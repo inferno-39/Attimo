@@ -43,3 +43,15 @@ export async function getProductById(id: string): Promise<Product | undefined> {
   const all = await fetchFromDb();
   return all.find((p) => p.slug === id || p.id === id);
 }
+
+/** Для блока «Рекомендуем» на странице товара: приоритет — та же коллекция, затем остальные. */
+export async function listRelatedProducts(excludeSlug: string, limit = 3): Promise<Product[]> {
+  const all = await listProducts(false);
+  const current = all.find((p) => p.slug === excludeSlug || p.id === excludeSlug);
+  const rest = all.filter((p) => p.slug !== excludeSlug && p.id !== excludeSlug);
+  if (!current?.collectionId) return rest.slice(0, limit);
+
+  const same = rest.filter((p) => p.collectionId === current.collectionId);
+  const other = rest.filter((p) => p.collectionId !== current.collectionId);
+  return [...same, ...other].slice(0, limit);
+}

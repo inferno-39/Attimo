@@ -7,7 +7,7 @@ import {
 import Link from "next/link";
 import { cn } from "@/utils/cn";
 
-type Variant = "primary" | "ghost" | "outline" | "link";
+type Variant = "primary" | "ghost" | "outline" | "link" | "inverted";
 
 type BaseProps = {
   variant?: Variant;
@@ -22,7 +22,7 @@ export type ButtonProps = BaseProps &
 const base =
   "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 text-caption-wide uppercase tracking-[0.2em]";
 const motion =
-  "font-sans text-[11px] transition-all duration-480 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold/80 disabled:pointer-events-none disabled:opacity-40";
+  "font-sans text-[11px] transition-all duration-480 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold/80 disabled:pointer-events-none disabled:opacity-40 touch-manipulation";
 
 const variants: Record<Variant, string> = {
   primary:
@@ -31,6 +31,8 @@ const variants: Record<Variant, string> = {
   outline:
     "bg-transparent border border-graphite text-graphite hover:bg-graphite hover:text-canvas",
   link: "bg-transparent underline-offset-[6px] hover:underline text-graphite px-1 border-0",
+  inverted:
+    "bg-transparent border border-canvas/55 text-canvas hover:bg-canvas hover:text-graphite hover:border-canvas",
 };
 
 export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(

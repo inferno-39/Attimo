@@ -1,0 +1,9 @@
+export { ProductGallery } from "./product-gallery";
+export { ProductInfo } from "./product-info";
+export { ProductActions } from "./product-actions";
+export { StorySection } from "./story-section";
+export { CraftsmanshipSection } from "./craftsmanship-section";
+export { RelatedProducts } from "./related-products";
+export { ProductDetails } from "./product-details";
+export { ProductTabs } from "./product-tabs";
+export { ProductHero } from "./product-hero";
