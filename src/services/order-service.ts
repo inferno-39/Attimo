@@ -21,7 +21,7 @@ export async function listOrdersForUser(userId: string) {
 
 export async function createOrder(userId: string | null, lines: OrderLineInput[]) {
   requireDatabase();
-  const resolvedLines: { productId: string; quantity: number; unitPriceCents: number }[] = [];
+  const resolvedLines: { productId: string; quantity: number; price: number }[] = [];
 
   for (const line of lines) {
     const product = await prisma.product.findFirst({
@@ -31,23 +31,23 @@ export async function createOrder(userId: string | null, lines: OrderLineInput[]
     resolvedLines.push({
       productId: product.id,
       quantity: line.quantity,
-      unitPriceCents: product.priceCents,
+      price: product.price,
     });
   }
 
-  const totalCents = resolvedLines.reduce((s, l) => s + l.unitPriceCents * l.quantity, 0);
+  const totalPrice = resolvedLines.reduce((s, l) => s + l.price * l.quantity, 0);
 
   return prisma.$transaction(async (tx) => {
     const order = await tx.order.create({
       data: {
         userId,
-        totalCents,
+        totalPrice,
         status: "PENDING",
         items: {
           create: resolvedLines.map((l) => ({
             productId: l.productId,
             quantity: l.quantity,
-            unitPriceCents: l.unitPriceCents,
+            price: l.price,
           })),
         },
       },

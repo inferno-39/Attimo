@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { mapPrismaError } from "@/lib/db-errors";
 
 export function jsonOk<T>(data: T, init?: number) {
   return NextResponse.json({ data }, { status: init ?? 200 });
@@ -21,6 +22,10 @@ export class AppError extends Error {
 export function handleApiError(e: unknown) {
   if (e instanceof AppError) {
     return jsonError(e.message, e.status);
+  }
+  const mapped = mapPrismaError(e);
+  if (mapped) {
+    return jsonError(mapped.message, mapped.status);
   }
   console.error(e);
   return jsonError("Внутренняя ошибка сервера", 500);

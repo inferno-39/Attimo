@@ -5,32 +5,42 @@ import { prismaProductToDto, type ProductWithRelations } from "@/lib/product-map
 import { productInclude } from "@/lib/prisma-includes";
 import type { Product } from "@/types/product";
 
+async function ensureWishlist(userId: string) {
+  return prisma.wishlist.upsert({
+    where: { userId },
+    create: { userId },
+    update: {},
+  });
+}
+
 export async function listWishlist(userId: string): Promise<Product[]> {
   requireDatabase();
-  const rows = await prisma.wishlistItem.findMany({
+  const wishlist = await prisma.wishlist.findUnique({
     where: { userId },
-    include: { product: { include: productInclude } },
-    orderBy: { createdAt: "desc" },
+    include: {
+      items: {
+        orderBy: { createdAt: "desc" },
+        include: { product: { include: productInclude } },
+      },
+    },
   });
-  return rows.map((w) => prismaProductToDto(w.product as ProductWithRelations));
+  if (!wishlist) return [];
+  return wishlist.items.map((w) => prismaProductToDto(w.product as ProductWithRelations));
 }
 
 export async function addToWishlist(userId: string, productId: string): Promise<void> {
   requireDatabase();
   const product = await prisma.product.findUnique({ where: { id: productId } });
-  if (!product) {
-    const bySlug = await prisma.product.findUnique({ where: { slug: productId } });
-    if (!bySlug) throw new AppError("Изделие не найдено", 404);
-    await prisma.wishlistItem.upsert({
-      where: { userId_productId: { userId, productId: bySlug.id } },
-      create: { userId, productId: bySlug.id },
-      update: {},
-    });
-    return;
-  }
+  const resolved =
+    product ?? (await prisma.product.findUnique({ where: { slug: productId } }));
+  if (!resolved) throw new AppError("Изделие не найдено", 404);
+
+  const wishlist = await ensureWishlist(userId);
   await prisma.wishlistItem.upsert({
-    where: { userId_productId: { userId, productId: product.id } },
-    create: { userId, productId: product.id },
+    where: {
+      wishlistId_productId: { wishlistId: wishlist.id, productId: resolved.id },
+    },
+    create: { wishlistId: wishlist.id, productId: resolved.id },
     update: {},
   });
 }
@@ -41,5 +51,11 @@ export async function removeFromWishlist(userId: string, productId: string): Pro
     where: { OR: [{ id: productId }, { slug: productId }] },
   });
   if (!product) throw new AppError("Изделие не найдено", 404);
-  await prisma.wishlistItem.deleteMany({ where: { userId, productId: product.id } });
+
+  const wishlist = await prisma.wishlist.findUnique({ where: { userId } });
+  if (!wishlist) return;
+
+  await prisma.wishlistItem.deleteMany({
+    where: { wishlistId: wishlist.id, productId: product.id },
+  });
 }

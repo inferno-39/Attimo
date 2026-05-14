@@ -1,17 +1,17 @@
-import { PrismaClient, ProductAvailability } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { mockProducts } from "../constants/mock-products";
 import type { Product } from "../types/product";
 
 const prisma = new PrismaClient();
 
-function uiAvailabilityToPrisma(a: Product["availability"]): ProductAvailability {
+function stockFromAvailability(a: Product["availability"]): number {
   switch (a) {
     case "in-stock":
-      return "IN_STOCK";
+      return 6;
     case "limited":
-      return "LIMITED";
+      return 2;
     default:
-      return "MADE_TO_ORDER";
+      return 0;
   }
 }
 
@@ -53,7 +53,7 @@ async function main() {
   for (const p of mockProducts) {
     const storyParts = [p.storyQuote, p.storyBody].filter(Boolean);
     const story = storyParts.length ? storyParts.join("\n\n") : null;
-    const stock = p.availability === "in-stock" ? 2 : 0;
+    const stock = stockFromAvailability(p.availability ?? "made-to-order");
 
     const category = p.catalogCategory
       ? await prisma.category.findUnique({ where: { slug: p.catalogCategory } })
@@ -79,11 +79,10 @@ async function main() {
         sizes: p.sizes ?? null,
         careInstructions: p.careInstructions ?? null,
         leadTime: p.leadTime ?? null,
-        availability: uiAvailabilityToPrisma(p.availability ?? "made-to-order"),
-        priceCents: p.priceRub * 100,
+        price: p.priceRub * 100,
         material: p.material ?? null,
         stock,
-        isFeatured: Boolean(p.featured),
+        featured: Boolean(p.featured),
         categoryId: category?.id,
         collectionId: collection?.id,
         images: {
@@ -108,11 +107,10 @@ async function main() {
         sizes: p.sizes ?? null,
         careInstructions: p.careInstructions ?? null,
         leadTime: p.leadTime ?? null,
-        availability: uiAvailabilityToPrisma(p.availability ?? "made-to-order"),
-        priceCents: p.priceRub * 100,
+        price: p.priceRub * 100,
         material: p.material ?? null,
         stock,
-        isFeatured: Boolean(p.featured),
+        featured: Boolean(p.featured),
         categoryId: category?.id,
         collectionId: collection?.id,
         images: {

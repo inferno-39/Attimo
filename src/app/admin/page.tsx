@@ -47,7 +47,9 @@ export default function AdminDashboardPage() {
         <p className="font-sans text-[14px] text-stone leading-relaxed">
           Схема: <code className="font-mono text-[13px] text-graphite">src/prisma/schema.prisma</code>. После{" "}
           <code className="font-mono text-[13px]">DATABASE_URL</code> выполните{" "}
-          <code className="font-mono text-[13px]">npm run db:migrate</code>, затем{" "}
+          <code className="font-mono text-[13px]">npm run db:migrate</code> (база{" "}
+          <code className="font-mono text-[13px]">20260515220000_attimo_foundation</code>) или{" "}
+          <code className="font-mono text-[13px]">npm run db:push</code> на пустой инстанс, затем{" "}
           <code className="font-mono text-[13px]">npm run db:seed</code>. Без БД каталог и PDP используют mock из{" "}
           <code className="font-mono text-[13px]">src/constants/mock-products.ts</code>.
         </p>

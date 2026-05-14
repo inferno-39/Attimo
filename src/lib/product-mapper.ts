@@ -1,16 +1,10 @@
 import type { Category, Collection, Product as PrismaProduct, ProductImage } from "@prisma/client";
-import { ProductAvailability as PrismaAvailability } from "@prisma/client";
 import type { CatalogCategoryId, Product, ProductAvailability } from "@/types/product";
 
-function mapAvailability(a: PrismaAvailability): ProductAvailability {
-  switch (a) {
-    case "IN_STOCK":
-      return "in-stock";
-    case "LIMITED":
-      return "limited";
-    default:
-      return "made-to-order";
-  }
+function stockToAvailability(stock: number): ProductAvailability {
+  if (stock >= 4) return "in-stock";
+  if (stock > 0) return "limited";
+  return "made-to-order";
 }
 
 function categorySlugToCatalogId(slug: string | undefined): CatalogCategoryId | undefined {
@@ -39,9 +33,9 @@ export function prismaProductToDto(p: ProductWithRelations): Product {
     name: p.title,
     subtitle: p.shortDescription ?? undefined,
     description: p.fullDescription,
-    priceRub: Math.round(p.priceCents / 100),
+    priceRub: Math.round(p.price / 100),
     material: p.material ?? undefined,
-    featured: p.isFeatured,
+    featured: p.featured,
     images: p.images.map((img) => ({
       url: img.url,
       alt: img.alt ?? p.title,
@@ -56,7 +50,7 @@ export function prismaProductToDto(p: ProductWithRelations): Product {
     craftsmanshipBody: p.craftsmanshipBody ?? undefined,
     craftsmanshipImageUrl: p.craftsmanshipImageUrl ?? undefined,
     sizes: p.sizes ?? undefined,
-    availability: mapAvailability(p.availability),
+    availability: stockToAvailability(p.stock),
     careInstructions: p.careInstructions ?? undefined,
     leadTime: p.leadTime ?? undefined,
   };

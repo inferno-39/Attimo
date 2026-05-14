@@ -98,7 +98,7 @@ export default async function ProfilePage() {
                         year: "numeric",
                       }).format(order.createdAt)}
                     </p>
-                    <p className="font-serif text-xl text-graphite">{formatPriceRub(Math.round(order.totalCents / 100))}</p>
+                    <p className="font-serif text-xl text-graphite">{formatPriceRub(Math.round(order.totalPrice / 100))}</p>
                   </div>
                   <p className="mt-2 font-sans text-[13px] text-stone">{ORDER_STATUS_RU[order.status]}</p>
                   <ul className="mt-4 space-y-1 font-sans text-[13px] text-stone">

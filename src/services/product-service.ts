@@ -3,16 +3,12 @@ import type { CatalogSortId } from "@/constants/catalog-filters";
 import { filterProducts, getDefaultCatalogFilters, sortProducts, type CatalogFilters } from "@/lib/catalog-query";
 import { prismaProductToDto, type ProductWithRelations } from "@/lib/product-mapper";
 import { buildProductOrderBy, buildProductWhere } from "@/lib/product-queries";
-import { productInclude } from "@/lib/prisma-includes";
+import { findManyProducts, findProductBySlugOrId } from "@/lib/repositories/product-repository";
 import type { Product } from "@/types/product";
 import type { ProductsQuery } from "@/server/validation";
 
 async function queryDbAll(): Promise<Product[]> {
-  const { prisma } = await import("@/lib/prisma");
-  const rows = await prisma.product.findMany({
-    include: productInclude,
-    orderBy: { updatedAt: "desc" },
-  });
+  const rows = await findManyProducts({});
   return rows.map((r) => prismaProductToDto(r as ProductWithRelations));
 }
 
@@ -38,11 +34,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
     return all.find((p) => p.slug === id || p.id === id);
   }
   try {
-    const { prisma } = await import("@/lib/prisma");
-    const row = await prisma.product.findFirst({
-      where: { OR: [{ slug: id }, { id }] },
-      include: productInclude,
-    });
+    const row = await findProductBySlugOrId(id);
     if (!row) {
       return mockProducts.find((p) => p.slug === id || p.id === id);
     }
@@ -87,11 +79,9 @@ export async function queryProductsApi(q: ProductsQuery): Promise<Product[]> {
   }
 
   try {
-    const { prisma } = await import("@/lib/prisma");
     const where = buildProductWhere(q);
-    const rows = await prisma.product.findMany({
+    const rows = await findManyProducts({
       where,
-      include: productInclude,
       orderBy: buildProductOrderBy(sort),
     });
     if (rows.length === 0) {

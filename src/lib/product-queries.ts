@@ -6,9 +6,9 @@ export function buildProductWhere(q: ProductsQuery): Prisma.ProductWhereInput {
   const where: Prisma.ProductWhereInput = {};
 
   if (q.featured === "true") {
-    where.isFeatured = true;
+    where.featured = true;
   } else if (q.featured === "false") {
-    where.isFeatured = false;
+    where.featured = false;
   }
 
   if (q.category && q.category !== "all") {
@@ -29,13 +29,13 @@ export function buildProductWhere(q: ProductsQuery): Prisma.ProductWhereInput {
 export function buildProductOrderBy(sort?: CatalogSortId): Prisma.ProductOrderByWithRelationInput[] {
   switch (sort) {
     case "price-asc":
-      return [{ priceCents: "asc" }];
+      return [{ price: "asc" }];
     case "price-desc":
-      return [{ priceCents: "desc" }];
+      return [{ price: "desc" }];
     case "name-asc":
       return [{ title: "asc" }];
     case "featured":
     default:
-      return [{ isFeatured: "desc" }, { updatedAt: "desc" }];
+      return [{ featured: "desc" }, { updatedAt: "desc" }];
   }
 }

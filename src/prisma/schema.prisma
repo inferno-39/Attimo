@@ -1,4 +1,7 @@
-// Attimo — PostgreSQL + NextAuth (Auth.js) Prisma Adapter
+// Attimo — PostgreSQL + Prisma.
+// DATABASE_URL: локальная разработка, Railway, Neon и т.д. (единый URI, SSL при необходимости — в строке подключения).
+// NextAuth (Auth.js): модели Account / Session / VerificationToken.
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -21,17 +24,13 @@ enum OrderStatus {
   CANCELLED
 }
 
-enum ProductAvailability {
-  IN_STOCK
-  MADE_TO_ORDER
-  LIMITED
-}
-
 model Category {
   id       String    @id @default(cuid())
   title    String
   slug     String    @unique
   products Product[]
+
+  @@index([slug])
 }
 
 model Collection {
@@ -40,42 +39,49 @@ model Collection {
   slug        String    @unique
   description String?   @db.Text
   products    Product[]
+
+  @@index([slug])
 }
 
+/// price — в копейках (минорная единица RUB). featured — витринные позиции.
 model Product {
-  id                      String              @id @default(cuid())
-  slug                    String              @unique
-  title                   String
-  shortDescription        String?
-  fullDescription         String              @db.Text
-  story                   String?             @db.Text
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  title            String
+  shortDescription String?
+  fullDescription  String   @db.Text
+  story            String?  @db.Text
+  material         String?
+  price            Int
+  stock            Int      @default(0)
+  featured         Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Расширения под editorial PDP (nullable — сид и маппер заполняют по желанию)
   emotionalLead           String?
   storyQuote              String?
-  storyBody               String?             @db.Text
+  storyBody               String? @db.Text
   craftsmanshipTitle      String?
-  craftsmanshipBody       String?             @db.Text
+  craftsmanshipBody       String? @db.Text
   craftsmanshipImageUrl   String?
   sizes                   String?
-  careInstructions        String?             @db.Text
+  careInstructions        String? @db.Text
   leadTime                String?
-  availability            ProductAvailability @default(MADE_TO_ORDER)
-  priceCents              Int
-  currency                String              @default("RUB")
-  material                String?
-  stock                   Int                 @default(0)
-  isFeatured              Boolean             @default(false)
-  createdAt               DateTime            @default(now())
-  updatedAt               DateTime            @updatedAt
 
   categoryId   String?
   category     Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   collectionId String?
   collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
 
-  images     ProductImage[]
-  wishlist   WishlistItem[]
-  cartItems  CartItem[]
-  orderItems OrderItem[]
+  images        ProductImage[]
+  wishlistItems WishlistItem[]
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+
+  @@index([categoryId])
+  @@index([collectionId])
+  @@index([featured])
 }
 
 model ProductImage {
@@ -85,6 +91,8 @@ model ProductImage {
   sortOrder Int     @default(0)
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
 }
 
 model User {
@@ -98,12 +106,13 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-
-  wishlist  WishlistItem[]
+  accounts  Account[]
+  sessions  Session[]
+  wishlists Wishlist[]
   cartItems CartItem[]
   orders    Order[]
+
+  @@index([email])
 }
 
 model Account {
@@ -127,7 +136,7 @@ model Account {
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String @unique
+  sessionToken String   @unique
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -141,16 +150,27 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model WishlistItem {
+/// Одна корзина избранного на пользователя (userId unique).
+model Wishlist {
   id        String   @id @default(cuid())
-  userId    String
-  productId String
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     WishlistItem[]
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlistId String
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
 
-  @@unique([userId, productId])
+  @@unique([wishlistId, productId])
+  @@index([wishlistId])
+  @@index([productId])
 }
 
 model CartItem {
@@ -164,27 +184,36 @@ model CartItem {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+  @@index([userId])
 }
 
+/// totalPrice — копейки на момент заказа (снимок корзины считается по позициям).
 model Order {
   id         String      @id @default(cuid())
   userId     String?
   user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   status     OrderStatus @default(PENDING)
-  totalCents Int
+  totalPrice Int
   currency   String      @default("RUB")
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 
   items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
 }
 
+/// price — цена строки в копейках (снимок).
 model OrderItem {
-  id             String  @id @default(cuid())
-  orderId        String
-  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId      String
-  product        Product @relation(fields: [productId], references: [id], onDelete: Restrict)
-  quantity       Int     @default(1)
-  unitPriceCents Int
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity  Int     @default(1)
+  price     Int
+
+  @@index([orderId])
+  @@index([productId])
 }
